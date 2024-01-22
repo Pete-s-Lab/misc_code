@@ -127,6 +127,10 @@ selectWindow(orig_stack);
 use_Z_proj = true;
 if(use_Z_proj == true){
 	run("Z Project...", "start=Z_start stop=Z_end projection=[Max Intensity]");
+	marking_img = getTitle();
+	run("Duplicate...", "title=marked_planes");
+	selectWindow(marking_img);
+	run("Close");
 } else {
 	run("Copy");
 	newImage("marked_planes", "8-bit black", width, height, 1);
@@ -136,6 +140,7 @@ marking_img = getTitle();
 print(marking_img);
 
 print("Marking cutting planes...");
+setFont("Sanserif", 7);  
 for(j=1; j<=no_cps; j++){
 	for(g=0; g<no_cps; g++){
 		curr_cp = list_of_cps[g];
