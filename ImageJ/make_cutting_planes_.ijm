@@ -19,24 +19,49 @@ Stack.getDimensions(width, height, channels, slices, frames);
 list_of_loading_choices = newArray("load text file", "choose planes manually");
 list_of_color_choices = newArray("white", "black");
 
+directions = newArray("x (left <-> right)", "y (up <-> down)");
 Dialog.create("Presettings");
 	Dialog.addMessage("Marking Cutting Planes Plugin.");
 	Dialog.addMessage("___________________________________");
-	Dialog.addChoice("How to get plane x values ", list_of_loading_choices, "list_of_loading_choices[0]");
+	Dialog.addChoice("How to get plane x or y values ", list_of_loading_choices, "list_of_loading_choices[0]");
 	Dialog.addMessage("___________________________________");
 	Dialog.addChoice("Mark planes in ", list_of_color_choices, "list_of_color_choices[0]");
 	Dialog.addMessage("___________________________________");
-	Dialog.addCheckbox("Create montage image of cutting planes ", true);
-	Dialog.addNumber("Number of images in one row in montage ", 5);
+	Dialog.addCheckbox("Mark cutting planes on Z projection", true);
+	Dialog.addNumber("Z projection start image ", 180);
+	Dialog.addNumber("Z projection end image ", 280);
 	Dialog.addMessage("___________________________________");
-	Dialog.addMessage("Ruehr P.T., ZFMK, Bonn (2016)")
+	Dialog.addCheckbox("Rotate cutting planes by 180°", true);
+	Dialog.addMessage("___________________________________");
+	Dialog.addMessage("Monatage stteings.");
+  	Dialog.addRadioButtonGroup("coordinate values", directions, 2, 1, "y (up <-> down)");
+	Dialog.addMessage("___________________________________");
+	Dialog.addCheckbox("Create montage image of cutting planes ", true);
+	Dialog.addNumber("Number of images in one row in montage ", 4);
+	Dialog.addMessage("___________________________________");
+	Dialog.addMessage("Ruehr P.T., ZFMK Bonn (2016); Uni Cologne (2024)")
 Dialog.show();
 load_text_file = Dialog.getChoice;
 color = Dialog.getChoice;
+use_Z_proj = Dialog.getCheckbox;
+Z_start = Dialog.getNumber;
+Z_end = Dialog.getNumber;
+rotate_planes = Dialog.getCheckbox;
+direction_string = Dialog.getRadioButton;
 montage = Dialog.getCheckbox;
 columns = Dialog.getNumber;
 
-waitForUser("1) Select slice on which cuting planes should be marked.\n2) Click 'Ok' AFTERWARDS.");
+
+
+if(direction_string == directions[0]){
+	direction = "x";
+} else{
+	direction = "y";
+}
+
+if(use_Z_proj == false){
+	waitForUser("1) Select slice on which cuting planes should be marked.\n2) Click 'Ok' AFTERWARDS.");
+}
 
 if(load_text_file == list_of_loading_choices[0]){
 	cutting_planes_folder = getDirectory("Choose Directory of text file");
@@ -88,23 +113,39 @@ else{
 }
 
 print("Processing:");
+run("Select All");
 print("Reslicing...");
-run("Reslice [/]...", "output=1 start=Left flip rotate avoid");
+if(direction == "x"){
+	run("Reslice [/]...", "output=1 start=Left flip rotate avoid");
+} else if(direction == "y"){
+	run("Reslice [/]...", "output=1 start=Top flip avoid");
+}
 reslice_stack = getTitle();
 
 print("Creating image for marking planes...");
 selectWindow(orig_stack);
-run("Select All");
-run("Copy");
-newImage("marked_planes", "8-bit black", width, height, 1);
+use_Z_proj = true;
+if(use_Z_proj == true){
+	run("Z Project...", "start=Z_start stop=Z_end projection=[Max Intensity]");
+} else {
+	run("Copy");
+	newImage("marked_planes", "8-bit black", width, height, 1);
+	run("Paste");
+}
 marking_img = getTitle();
-run("Paste");
+print(marking_img);
 
 print("Marking cutting planes...");
 for(j=1; j<=no_cps; j++){
 	for(g=0; g<no_cps; g++){
 		curr_cp = list_of_cps[g];
-		makeRectangle(curr_cp, 0, 1, height);
+		if(direction == "x"){
+			makeRectangle(curr_cp, 0, 1, height);
+			drawString(g+1, curr_cp+10, 0+1);
+		} else if(direction == "y"){
+			makeRectangle(0, curr_cp, height, 1);
+			drawString(g+1, 0+10, curr_cp+1);
+		}
 		run("Cut");
 	}
 }
@@ -124,9 +165,16 @@ print(list_of_cps_string);
 run("Make Substack...", "  slices=" + list_of_cps_string);
 substack_title = getTitle();
 
+if(rotate_planes == true){
+	run("Rotate... ", "angle=180 grid=1 interpolation=None stack");
+}
+
 if(montage == true){
 	print("Creating montage image...");
 	rows = -floor(-no_cps/columns);
+	
+	setForegroundColor(255, 255, 255);
+	setFont("Sanserif", 50);  
 	
 	mont_width = width * columns;
 	mont_height = height * rows;
@@ -150,6 +198,9 @@ if(montage == true){
 		curr_y = row_counter*height+1;
 		makeRectangle(curr_x, curr_y, width, height);
 		run("Paste");
+		
+		run("Select None");
+		drawString(s, curr_x+30, curr_y+60);
 		col_counter++;
 	}
 }
@@ -165,6 +216,11 @@ if(montage == true){
 	selectWindow(montage_title);
 	run("Select None");
 }
+
+selectWindow(reslice_stack);
+run("Close");
+selectWindow(substack_title);
+run("Close");
 
 print("All done!");
 print("Thanks for using the script.");
