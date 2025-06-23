@@ -8,11 +8,13 @@ v. 0.0.9064
  // User input at start
 Dialog.create("Image Annotation Settings");
 Dialog.addNumber("Start Number", 1);
-Dialog.addString("Prefix", "PTR_MG_");
+Dialog.addString("Prefix", "PTR");
+Dialog.addString("Garden", "MG");
 Dialog.addString("Location", "MyLocation");
 Dialog.show();
 startNum = Dialog.getNumber();
 prefix = Dialog.getString();
+garden = Dialog.getString();
 locationText = Dialog.getString();
 
 mesh_size = 0.612; // Leifs Duschvorhang: 0.612 or 0.42
@@ -90,8 +92,8 @@ for (i = 0; i < list.length; i++) {
 		    datePart = parts[0];
 		    timePart = parts[1];
 		
-		    datePart = replace(datePart, ":", "-");
-		    timePart = replace(timePart, ":", "-");
+		    datePart = replace(datePart, ":", "");
+		    timePart = replace(timePart, ":", "");
 		
 		    formatted_datetime = datePart + "_" + timePart;
 		    timeStr = formatted_datetime;
@@ -167,7 +169,7 @@ for (i = 0; i < list.length; i++) {
         // Draw labels (white, top-left stacked)
         imageIndex = startNum + counter;
         imageNum = IJ.pad(parseInt(imageIndex), 3);
-        label = prefix + imageNum;
+        label = prefix + "-" + garden + "-" + imageNum;
 
         getDimensions(width, height, channels, slices, frames);
         fontSize = 32; // fixed size, adjust if needed
