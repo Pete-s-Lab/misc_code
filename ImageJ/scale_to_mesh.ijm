@@ -2,7 +2,7 @@
 Calibrates image according to underlying mesh.
 
 Peter T. Rühr, June 2025
-v. 0.0.9064
+v. 0.0.9065
  *******************************************************/
  
  // User input at start
@@ -17,7 +17,7 @@ prefix = Dialog.getString();
 garden = Dialog.getString();
 locationText = Dialog.getString();
 
-mesh_size = 0.612; // Leifs Duschvorhang: 0.612 or 0.42
+mesh_size = 5; // Leifs Duschvorhang: 0.612 or 0.42
 
 scalebarSize_mm = 1;
 unit = "mm";
@@ -60,7 +60,7 @@ for (i = 0; i < list.length; i++) {
 		
 		// Run Show Info and export to temp file
 		run("Show Info...");
-		wait(500);
+		wait(250);
 		saveAs("Text", tmpFile);
 		
 		// Close the "Info for ..." window if open
@@ -114,8 +114,8 @@ for (i = 0; i < list.length; i++) {
             unit = unit;
             if(mesh_size == 0.612) {
             	print("Leif's curtain");
-	            smoothing_window = 25;
-	            tolerance = 40;
+	            smoothing_window = 5;
+	            tolerance = 20;
 	            invert_ = false;
             } else {
             	print("BioForm lighthouse");
@@ -141,12 +141,12 @@ for (i = 0; i < list.length; i++) {
             }
 
             Plot.create("Profile", "px", "color", profile_smooth);
-            minima_x = Array.sort(Array.findMinima(profile_smooth, tolerance));
-            minima_y = newArray;
-            for (m = 0; m < minima_x.length; m++)
-                minima_y[m] = profile_smooth[minima_x[m]];
-            Plot.add("Circle", minima_x, minima_y);
-
+			minima_x = Array.sort(Array.findMinima(profile_smooth, tolerance));
+			minima_y = newArray;
+			for (m = 0; m < minima_x.length; m++)
+			    minima_y[m] = profile_smooth[minima_x[m]];
+			Plot.add("Circle", minima_x, minima_y);
+            
             distances = newArray;
             for (m = 1; m < minima_x.length; m++)
                 distances[m - 1] = minima_x[m] - minima_x[m - 1];
@@ -154,7 +154,7 @@ for (i = 0; i < list.length; i++) {
             Array.getStatistics(distances, min, max, mean, std);
             distances = Array.sort(distances);
             pixel_size = mesh_size / mean;
-
+            
             selectWindow("img_copy");
             close();
 
@@ -164,6 +164,11 @@ for (i = 0; i < list.length; i++) {
 
             // Add scalebar
             run("Scale Bar...", "width=" + scalebarSize_mm + " height=8 font=36 color=White background=Black location=[Lower Right] bold");
+            
+            
+			Plot.show();  // <-- this shows the plot window
+			waitForUser("Check the detected minima. Click OK to continue.");
+			if (isOpen("Profile")) { selectWindow("Profile"); run("Close"); }
         }
 
         // Draw labels (white, top-left stacked)
