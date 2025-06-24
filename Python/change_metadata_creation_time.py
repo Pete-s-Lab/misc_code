@@ -1,3 +1,10 @@
+# ********************************************************
+# Changes the creation date metadata according to its filename.
+# 
+# Peter T. Rühr, June 2025
+# v. 0.0.9001
+# *******************************************************
+
 import os
 import sys
 import time
