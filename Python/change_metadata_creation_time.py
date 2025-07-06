@@ -1,9 +1,9 @@
 # ********************************************************
-# Changes the creation date metadata according to its filename.
+# Calibrates image according to underlying mesh.
 # 
 # Peter T. Rühr, June 2025
-# v. 0.0.9001
-# *******************************************************
+# v. 0.0.9008
+# *******************************************************/
 
 import os
 import sys
@@ -61,7 +61,7 @@ def update_exif_date(image_path):
         exif_bytes = piexif.dump(exif_dict)
         img.save(image_path, "jpeg", exif=exif_bytes)
 
-        print(f"Updated EXIF metadata: {image_path} -> {new_exif_date}")
+        # print(f"Updated EXIF metadata: {image_path} -> {new_exif_date}")
 
     except Exception as e:
         print(f"Error updating EXIF metadata for {image_path}: {e}")
@@ -98,7 +98,7 @@ def update_file_timestamps(image_path):
             kernel32.SetFileTime(handle, ctypes.byref(ctime), None, ctypes.byref(ctime))
             kernel32.CloseHandle(handle)
 
-        print(f"Updated file timestamps: {image_path} -> {new_datetime}")
+        print(f"Updated Updated EXIF metadata and file timestamps: {image_path} -> {new_datetime}")
 
     except Exception as e:
         print(f"Error updating timestamps for {image_path}: {e}")
