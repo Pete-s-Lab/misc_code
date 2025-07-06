@@ -2,7 +2,7 @@
 Calibrates image according to underlying mesh.
 
 Peter T. Rühr, June 2025
-v. 0.0.9065
+v. 0.0.9066
  *******************************************************/
  
  // User input at start
