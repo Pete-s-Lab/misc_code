@@ -1,3 +1,11 @@
+# Check if pdfcrop is installed 
+# * Linux: sudo apt install texlive-extra-utils
+# * Windows: install TeX Live
+# * macOS: installed with MacTeX
+
+# Check:
+  # pdfcrop --version
+
 auto_crop_pdf <- function(infile, outfile, margin = 5) {
   cmd <- sprintf('pdfcrop --margins "%d %d %d %d" %s %s',
                  margin, margin, margin, margin,
