@@ -1,0 +1,15 @@
+normal tagging with gpx file
+exiftool -geotag "track.gpx" "C:\Photos"
+exiftool -geotag "20260719.gpx" "./"
+
+offset cam 37 secs behind gpx phone
+exiftool -geotag "track.gpx" -geosync=37 "C:\Photos"
+
+check if photo is geotagged
+exiftool -GPS:All -DateTimeOriginal "phone_photo.jpg"
+
+tag photos with geotagged photos
+exiftool -geotag "C:\Photos\Phone\*.jpg" "C:\Photos\Camera"
+
+tag with gpx and geotagged photos
+exiftool -geotag "track.gpx" -geotag "C:\Photos\Phone\*.jpg" "C:\Photos\Camera"
